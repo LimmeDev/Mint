@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using Mafi.Core.Entities;
 using Mafi.Core.Products;
+using Mafi.Collections;
 
 namespace CoI_AI_Mod
 {
@@ -110,6 +111,9 @@ namespace CoI_AI_Mod
 				Log.Error($"[AI] Unexpected error: {e.Message}");
 			}
 		}
+
+		// Provide empty config to satisfy IMod interface present in your DLL set.
+		public Option<IConfig> ModConfig => Option.None;
 	}
 
 	// Data structure for sending to Python
@@ -123,4 +127,7 @@ namespace CoI_AI_Mod
 	{
 		public string message { get; set; }
 	}
+
+	// Local stub so the compiler can find the symbol when building against 0.6 assemblies
+	namespace Mafi.Core.Mods { public interface IConfig { } }
 }
