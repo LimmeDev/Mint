@@ -1,6 +1,5 @@
 ﻿using Mafi;
 using Mafi.Core.Mods;
-using Mafi.Core.Game;
 using Mafi.Core.Entities.Static;
 using Mafi.Core.Prototypes;
 using System.Collections.Generic;
@@ -10,7 +9,6 @@ using System.Text.Json;
 using Mafi.Core.Entities;
 using Mafi.Collections;
 using Mafi.Core.Products;
-using Mafi.Core.GameLoop;
 
 namespace CoI_AI_Mod
 {
@@ -23,19 +21,14 @@ namespace CoI_AI_Mod
 		// COI v0.7+ expects Option<IConfig>. We expose an empty config so the game loads without user settings.
 		public Option<IConfig> ModConfig => Option.None;
 
-		private IGameLoop _gameLoop;
 		private ProtosDb _protosDb;
 		private IEntitiesManager _entitiesManager;
 		private static readonly HttpClient _httpClient = new HttpClient();
-		private int _tickCounter = 0;
-		private const int TickInterval = 120; // Approx 2 seconds
-		private bool _isWaitingForResponse = false;
 		private const string ServerUrl = "http://127.0.0.1:8000/";
 
 		// Signature changed (added isEditor) in API 0.7+.
 		public void Initialize(DependencyResolver resolver, bool isEditor)
 		{
-			_gameLoop = resolver.Resolve<IGameLoop>();
 			_protosDb = resolver.Resolve<ProtosDb>();
 			_entitiesManager = resolver.Resolve<IEntitiesManager>();
 		}
@@ -64,44 +57,36 @@ namespace CoI_AI_Mod
 
 		public void LateInit(DependencyResolver resolver)
 		{
-			_gameLoop.UpdateEv.Add(this.OnUpdate);
-			Log.Info("AI Mod Initialized, starting update loop.");
+			Log.Info("AI Mod Initialized (0.6 build). No automatic tick polling available – call SendWorldSnapshotToAiServer() from another mod hook if needed.");
 		}
 
-		private async void OnUpdate(GameTime gameTime)
+		/// <summary>
+		/// Collects a lightweight snapshot of the current world and POSTs it to the Python AI service.
+		/// In COI 0.6 this is NOT called automatically – invoke manually from another event or console command.
+		/// </summary>
+		public async System.Threading.Tasks.Task SendWorldSnapshotToAiServer()
 		{
-			if (_isWaitingForResponse) return;
+			// 1. Gather game data
+			var worldData = new WorldData();
 
-			_tickCounter++;
-			if (_tickCounter < TickInterval) return;
-			
-			_tickCounter = 0;
-			_isWaitingForResponse = true;
+			var allProducts = _protosDb.Filter<ProductProto>(p => !p.IsVirtual);
+			foreach (ProductProto product in allProducts)
+			{
+				Quantity quantity = _entitiesManager.CountProducts(product);
+				if (quantity > 0)
+				{
+					worldData.Products.Add(product.Id.ToString(), quantity.ToString());
+				}
+			}
+
+			// 2. Serialize to JSON
+			var options = new JsonSerializerOptions { WriteIndented = true };
+			string jsonPayload = JsonSerializer.Serialize(worldData, options);
 
 			try
 			{
-				// 1. Gather game data
-				var worldData = new WorldData();
-
-				// Get all products and their stored quantities
-				var allProducts = _protosDb.Filter<ProductProto>(p => !p.IsVirtual);
-				foreach (ProductProto product in allProducts)
-				{
-					Quantity quantity = _entitiesManager.CountProducts(product);
-					if (quantity > 0)
-					{
-						worldData.Products.Add(product.Id.ToString(), quantity.ToString());
-					}
-				}
-
-				// 2. Serialize to JSON
-				var options = new JsonSerializerOptions { WriteIndented = true };
-				string jsonPayload = JsonSerializer.Serialize(worldData, options);
-
-				// 3. Send data to Python server
 				var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-				
-				Log.Info("Sending data to AI Brain...");
+				Log.Info("[AI] Posting world snapshot…");
 				var response = await _httpClient.PostAsync(ServerUrl, content);
 
 				if (response.IsSuccessStatusCode)
@@ -110,25 +95,21 @@ namespace CoI_AI_Mod
 					var aiResponse = JsonSerializer.Deserialize<AiResponse>(responseBody);
 					if (aiResponse != null && !string.IsNullOrEmpty(aiResponse.message))
 					{
-						Log.Info($"[AI BRAIN]: {aiResponse.message}");
+						Log.Info($"[AI] {aiResponse.message}");
 					}
 				}
 				else
 				{
-					Log.Warning($"Failed to connect to AI Brain. Status: {response.StatusCode}");
+					Log.Warning($"[AI] HTTP {response.StatusCode} while sending snapshot.");
 				}
 			}
 			catch (HttpRequestException e)
 			{
-				Log.Error($"Connection error with AI Brain: {e.Message}. Is the Python server running?");
+				Log.Error($"[AI] Connection error: {e.Message}");
 			}
 			catch (System.Exception e)
 			{
-				Log.Error($"An error occurred during the update loop: {e.Message}");
-			}
-			finally
-			{
-				_isWaitingForResponse = false;
+				Log.Error($"[AI] Unexpected error: {e.Message}");
 			}
 		}
 	}
