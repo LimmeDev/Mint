@@ -16,7 +16,7 @@ The default behaviour is a "hello-world" loop: every two seconds the mod pushes 
 |------|-----|---------|
 | **Java 17 JDK** | compile the mod | <https://adoptium.net> |
 | **Git for Windows** | clone / update the repo *(`git` command)* | <https://git-scm.com/download/win> *(or skip and use "Download ZIP")* |
-| **Gradle 8+** | build automation (wrapper bundled) | none – wrapper auto-downloads |
+| **Gradle 8+** | build automation | *Two options:* ① **use the bundled wrapper** (no install) or ② install Gradle system-wide (steps below) |
 | **Fabric Loader + Fabric API** | modding platform | installer at <https://fabricmc.net> |
 | **Python 3.9+** | run the AI server | <https://python.org> |
 | *(optional)* CUDA toolkit | GPU inference for `llama-cpp-python` | see library docs |
@@ -133,3 +133,21 @@ Close the Python process or run `/reload` in-game to unload the mod.
 
 ---
 Happy experimenting! 
+
+---
+# Appendix A – Installing Gradle on Windows (only if you want a global install)
+
+The repo normally **does not require** a global Gradle because `gradlew.bat` (the wrapper) downloads everything for you. If you prefer a permanent Gradle install:
+
+1. Download the **binary-only ZIP** from the latest release, e.g. `gradle-8.7-bin.zip`:  
+  <https://gradle.org/releases>
+2. Extract to `C:\Gradle\gradle-8.7\`  (create the folder first).
+3. Add the `bin` directory to `PATH`:
+  • Win + S → search *"env"* → **Edit the system environment variables**  
+  • **Environment Variables…** → *System variables* → select `Path` → **Edit** → **New** → `C:\Gradle\gradle-8.7\bin`
+4. Close & reopen PowerShell, then verify:
+  ```powershell
+  gradle -v   # prints version info
+  ```
+
+From now on you can run `gradle <task>` instead of `gradlew.bat <task>`. 
