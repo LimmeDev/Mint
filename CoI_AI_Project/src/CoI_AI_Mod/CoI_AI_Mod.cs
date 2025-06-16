@@ -125,4 +125,12 @@ namespace CoI_AI_Mod
 	{
 		public string message { get; set; }
 	}
+
+// ---------------------------------------------------------------------------
+// Captain of Industry 0.6 placeholder – missing in pre-0.7 assemblies.
+// We define a minimal IConfig so the code compiles; the game engine won't
+// access it because the AI mod doesn't expose settings yet.
+namespace Mafi.Core.Mods {
+    public interface IConfig { }
+}
 }
