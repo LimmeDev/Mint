@@ -15,15 +15,19 @@ The default behaviour is a "hello-world" loop: every two seconds the mod pushes 
 | Tool | Why | Install |
 |------|-----|---------|
 | **Java 17 JDK** | compile the mod | <https://adoptium.net> |
+| **Git for Windows** | clone / update the repo *(`git` command)* | <https://git-scm.com/download/win> *(or skip and use "Download ZIP")* |
 | **Gradle 8+** | build automation (wrapper bundled) | none – wrapper auto-downloads |
-| **Fabric Loader & Fabric API** | modding platform | grab installer from <https://fabricmc.net> |
+| **Fabric Loader + Fabric API** | modding platform | installer at <https://fabricmc.net> |
 | **Python 3.9+** | run the AI server | <https://python.org> |
 | *(optional)* CUDA toolkit | GPU inference for `llama-cpp-python` | see library docs |
 
 ---
 ## 1. Build & run the Minecraft mod  (Windows 10/11)
 
-Open an **"Developer PowerShell for VS"** (or regular PowerShell with Git in `%PATH%`). Replace `C:\Dev` with any folder you like.
+Open an **"Developer PowerShell for VS"** (or regular PowerShell).  
+If `git` is *not* recognised, either
+1. Install **Git for Windows** (link above) and restart PowerShell, **or**
+2. Click the green "**Code → Download ZIP**" button on GitHub, extract to `C:\Dev\AiCraft`, then start at step 1-b.
 
 ```powershell
 # 1-a.  Clone the repo
