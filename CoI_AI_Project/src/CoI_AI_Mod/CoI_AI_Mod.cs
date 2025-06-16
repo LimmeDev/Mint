@@ -131,3 +131,4 @@ namespace CoI_AI_Mod
 // ---------------------------------------------------------------------------
 // Global stub so the compiler can find the symbol when building against 0.6 assemblies
 namespace Mafi.Core.Mods { public interface IConfig { } }
+}
