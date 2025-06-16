@@ -7,7 +7,6 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using Mafi.Core.Entities;
-using Mafi.Collections;
 using Mafi.Core.Products;
 
 namespace CoI_AI_Mod
@@ -18,8 +17,7 @@ namespace CoI_AI_Mod
 		public int Version => 1;
 		public bool IsUiOnly => false;
 
-		// COI v0.7+ expects Option<IConfig>. We expose an empty config so the game loads without user settings.
-		public Option<IConfig> ModConfig => Option.None;
+		// ModConfig is only required in COI 0.7+. The 0.6 API we target does not define it, so we omit it here.
 
 		private ProtosDb _protosDb;
 		private IEntitiesManager _entitiesManager;
@@ -125,12 +123,4 @@ namespace CoI_AI_Mod
 	{
 		public string message { get; set; }
 	}
-
-// ---------------------------------------------------------------------------
-// Captain of Industry 0.6 placeholder – missing in pre-0.7 assemblies.
-// We define a minimal IConfig so the code compiles; the game engine won't
-// access it because the AI mod doesn't expose settings yet.
-namespace Mafi.Core.Mods {
-    public interface IConfig { }
-}
 }
