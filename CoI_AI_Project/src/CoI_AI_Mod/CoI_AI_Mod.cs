@@ -128,6 +128,6 @@ namespace CoI_AI_Mod
 		public string message { get; set; }
 	}
 
-	// Local stub so the compiler can find the symbol when building against 0.6 assemblies
-	namespace Mafi.Core.Mods { public interface IConfig { } }
-}
+// ---------------------------------------------------------------------------
+// Global stub so the compiler can find the symbol when building against 0.6 assemblies
+namespace Mafi.Core.Mods { public interface IConfig { } }
