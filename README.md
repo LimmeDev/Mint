@@ -21,42 +21,56 @@ The default behaviour is a "hello-world" loop: every two seconds the mod pushes 
 | *(optional)* CUDA toolkit | GPU inference for `llama-cpp-python` | see library docs |
 
 ---
-## 1. Build & run the Minecraft mod
+## 1. Build & run the Minecraft mod  (Windows 10/11)
 
-```bash
-# clone and generate sources (first time only)
-./gradlew :MC_AI_Project:genSources
+Open an **"Developer PowerShell for VS"** (or regular PowerShell with Git in `%PATH%`). Replace `C:\Dev` with any folder you like.
 
-# run the client with the mod on the classpath
-./gradlew :MC_AI_Project:runClient
+```powershell
+# 1-a.  Clone the repo
+> git clone https://github.com/LimmeDev/CoiAI.git C:\Dev\AiCraft
+> cd C:\Dev\AiCraft
+
+# 1-b.  First-time Gradle prep – this downloads Yarn mappings & Fabric jars
+> .\gradlew.bat :MC_AI_Project:genSources   # ~100 MB, one-time only
+
+# 1-c.  Launch the game with the mod on the classpath
+> .\gradlew.bat :MC_AI_Project:runClient
 ```
 
-*The first build may download ~100 MB of Maven deps.
-Subsequent invocations are incremental.*
+(If **Windows SmartScreen** complains the first time you run `gradlew.bat`, click "More info → Run anyway"; it's just the Gradle wrapper.)
 
-**Dedicated server**
-```bash
-./gradlew :MC_AI_Project:runServer
+*The first build downloads Maven dependencies; subsequent launches are near-instant.*
+
+### Running a dedicated Fabric **server**
+```powershell
+> .\gradlew.bat :MC_AI_Project:runServer
 ```
-(The mod works identically in single-player or on a Fabric server.)
+Server console appears; the AI functions the same in multiplayer.
 
-After the client starts you should see
+When the client finishes loading you should see this in the log:
 ```
 [AiCraft] WebSocket connected
 ```
-in the game log.
+which means the mod successfully opened the WebSocket to the Python AI.
 
 ---
 ## 2. Start the AI server
 
-```bash
+```powershell
 cd python_ai
-python -m venv .venv && source .venv/bin/activate  # (optional) virtual-env
-pip install -r requirements.txt --upgrade
 
-# FAST CPU build of llama-cpp (no CUDA)
-export LLAMA_MODEL=~/models/Meta-Llama-3-8B-instruct.Q4_K_M.gguf   # path to your GGUF
-python main.py
+# 2-a.  (Recommended) create an isolated virtual-env
+> python -m venv .venv
+> .\.venv\Scripts\Activate.ps1        # prompt changes to (venv)
+
+# 2-b.  Install deps (Flask + WebSocket + optional llama-cpp)
+> pip install --upgrade -r requirements.txt
+
+# 2-c.  Point to your downloaded GGUF model (or skip for echo mode)
+> $env:LLAMA_MODEL = "C:\Models\Meta-Llama-3-8B-instruct.Q4_K_M.gguf"
+
+# 2-d.  Run the server
+> python main.py
 ```
 Console output:
 ```
