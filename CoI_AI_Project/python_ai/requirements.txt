@@ -1,2 +1,11 @@
 Flask
 llama-cpp-python>=0.2.43 
+using Mafi.Core.Products;
+using Mafi.Core.Time;
+using Mafi.Core.Mods;
+using Mafi.Core.Mods.Attributes;
+
+public IModConfig ModConfig { get; } = new EmptyConfig();
+public void RegisterDependencies
+      (DependencyResolverBuilder builder, ProtosDb db, bool isEditor) { }
+public void Initialize(DependencyResolver resolver, bool isEditor) { /* … */ } 
