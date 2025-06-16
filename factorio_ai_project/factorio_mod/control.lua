@@ -99,7 +99,7 @@ script.on_event({defines.events.on_tick, defines.events.on_http_request_complete
       }
     }
 
-    local request_body_json = helpers.table_to_json(request_body_table)
+    local request_body_json = game.table_to_json(request_body_table)
     
     -- The address of our Python server running on the VM
     local url = "http://192.168.68.84:8000/"
