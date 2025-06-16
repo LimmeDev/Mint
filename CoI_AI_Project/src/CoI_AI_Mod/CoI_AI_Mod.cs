@@ -10,8 +10,6 @@ using System.Text.Json;
 using Mafi.Core.Entities;
 using Mafi.Collections;
 using Mafi.Core.Products;
-using Mafi.Core.Time;
-using Mafi.Core.Mods.Attributes;
 using Mafi.Core.GameLoop;
 
 namespace CoI_AI_Mod
@@ -22,10 +20,8 @@ namespace CoI_AI_Mod
 		public int Version => 1;
 		public bool IsUiOnly => false;
 
-		// New in COI 0.7+: every mod must expose a config object even if it is empty.
-		// Replace `EmptyConfig` with your own ModConfig implementation once you need
-		// user-visible settings inside the game's mod UI.
-		public IModConfig ModConfig { get; } = new EmptyConfig();
+		// COI v0.7+ expects Option<IConfig>. We expose an empty config so the game loads without user settings.
+		public Option<IConfig> ModConfig => Option.None;
 
 		private IGameLoop _gameLoop;
 		private ProtosDb _protosDb;
