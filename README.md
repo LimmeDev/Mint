@@ -1,78 +1,72 @@
-# Mint AI Framework
+# Mint Build Tool
 
-A modern AI assistant framework built with Python, PyTorch, and Transformers.
+A minimal yet robust build system for C and C++ projects with optional language‐specific extensions (Rust, Go, etc.).  Mint focuses on speed, cross-platform compatibility, and zero-configuration defaults—you can compile a simple project with one command:
+
+```bash
+mint build
+```
 
 ## Features
 
-- State-of-the-art language model integration
-- API server for easy deployment
-- Customizable response generation
-- Extensible architecture for adding new capabilities
+* **Zero-config**: run in any directory containing `*.cpp` files—no JSON or XML manifests required.
+* **Cross-platform**: Windows, macOS, and Linux supported out of the box (uses `clang++` or `g++`).
+* **Incremental**: only recompiles files whose timestamps changed.
+* **Parallel**: compiles sources concurrently using all CPU cores.
+* **Multiple toolchains**: choose `--lang rust`, `--lang go`, etc., to delegate to language-specific builders.
+* **Ninja generator**: `mint configure` writes a `build.ninja` for IDE integration.
 
-## Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/mint.git
-cd mint
-
-# Create a virtual environment (optional but recommended)
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install the package
-pip install -e .
-
-# For development dependencies
-pip install -e ".[dev]"
-```
-
-## Usage
-
-```python
-from mint import Assistant
-
-# Initialize the assistant
-assistant = Assistant()
-
-# Generate a response
-response = assistant.generate("Tell me about artificial intelligence.")
-print(response)
-```
-
-## API Server
-
-Start the API server:
+## Installation (pip)
 
 ```bash
-python -m mint.server
+python -m pip install mint-build
 ```
 
-The API will be available at http://localhost:8000
-
-## Configuration
-
-Create a `.env` file in the root directory with the following variables:
-
-```
-MODEL_PATH=path/to/your/model
-API_KEY=your_api_key
-```
-
-## Development
-
-Run tests:
+Or from source:
 
 ```bash
-pytest
+git clone https://github.com/LimmeDev/Mint.git
+cd Mint
+python -m pip install -e .
 ```
 
-Format code:
+## Quick Start
 
 ```bash
-black mint tests
-isort mint tests
+# in your C/C++ project directory
+mint build          # Debug build (default)
+mint build -r       # Release build (-O3)
+
+mint clean          # Remove build artifacts
 ```
+
+## Command-line Reference
+
+```bash
+mint build  [options]   Compile & link project
+mint clean              Delete build directory
+mint configure          Generate build.ninja
+mint version            Show Mint version
+```
+
+Common `build` options:
+
+| Option | Description |
+|--------|-------------|
+| `--release, -r` | Optimised build (equivalent to `-O3`) |
+| `--clean`       | Clean before building |
+| `--lang <key>`  | Force toolchain (`cpp`, `rust`, `go`, …) |
+| `--verbose, -v` | Show every compiler command |
+| `--dry-run`     | Print commands without executing |
+
+## Design Goals
+
+1. **Simplicity**—one small dependency-free YAML config (optional).
+2. **Speed**—uses a thread-pool and minimal I/O.
+3. **Portability**—no POSIX‐only tricks; works with MSVC, MinGW, Clang, GCC.
+
+## Contributing
+
+Issues and PRs are welcome!  See `CONTRIBUTING.md` for guidelines.
 
 ## License
 
