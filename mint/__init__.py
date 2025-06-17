@@ -1,9 +1,7 @@
 """
-Mint AI Framework - A modern AI assistant framework
+Mint – minimal yet ultra-stable C/C++ build tool.
 """
 
 __version__ = "0.1.0"
 
-from mint.assistant import Assistant
-
-__all__ = ["Assistant"] 
+__all__ = ["__version__"] 

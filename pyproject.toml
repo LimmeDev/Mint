@@ -3,25 +3,18 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mint"
+name = "mint-build"
 version = "0.1.0"
-description = "A modern AI assistant framework"
+description = "Minimal yet stable C/C++ build tool with a focus on robustness and cross-platform compatibility"
+requires-python = ">=3.11"
+authors = [{ name = "Mint Contributors" }]
+license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">=3.8"
-license = {text = "MIT"}
-authors = [
-    {name = "Your Name", email = "your.email@example.com"}
-]
+
 dependencies = [
-    "numpy>=1.20.0",
-    "torch>=1.9.0",
-    "transformers>=4.15.0",
-    "fastapi>=0.68.0",
-    "uvicorn>=0.15.0",
-    "python-dotenv>=0.19.0",
+    "typer>=0.12.0",
     "rich>=13.0.0",
     "pyyaml>=6.0",
-    "typer>=0.12.0",
 ]
 
 [project.optional-dependencies]
@@ -34,7 +27,7 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = {find = {}}
+packages = ["mint"]
 
 [tool.black]
 line-length = 88
@@ -56,5 +49,5 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 
 [project.scripts]
-mint = "mint.__main__:main"
+mint = "mint.cli:app"
  
