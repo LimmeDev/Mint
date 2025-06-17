@@ -14,6 +14,7 @@ mint build
 * **Parallel**: compiles sources concurrently using all CPU cores.
 * **Multiple toolchains**: choose `--lang rust`, `--lang go`, etc., to delegate to language-specific builders.
 * **Ninja generator**: `mint configure` writes a `build.ninja` for IDE integration.
+* **YAML toolchain**: includes `yaml` for configuration validation.
 
 ## Installation (pip)
 

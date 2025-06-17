@@ -29,11 +29,11 @@ def build(
     """Compile & link the current project."""
 
     # Auto-delegate to Ninja if a build.ninja exists
-    build_dir = Path.cwd() / "build"
-    ninja_file = build_dir / "build.ninja"
+    target_build_dir: Path = build_dir or (Path.cwd() / "build")
+    ninja_file = target_build_dir / "build.ninja"
     if ninja_file.exists():
         console.print("[blue]build.ninja detected, invoking Ninja…[/]")
-        run(["ninja", "-C", str(build_dir)])
+        run(["ninja", "-C", str(target_build_dir)])
         return
     try:
         # Setup flags
@@ -48,7 +48,7 @@ def build(
         detected_lang = lang if lang != "auto" else _detect_lang(root)
 
         if detected_lang == "cpp":
-            builder = Builder(root, build_dir=build_dir, release=release, config=cfg)
+            builder = Builder(root, build_dir=target_build_dir, release=release, config=cfg)
             if clean_first:
                 builder.clean()
             builder.build()
@@ -59,7 +59,6 @@ def build(
                 console.print(f"[red]Unsupported toolchain '{detected_lang}'. Available: {', '.join(available_toolchains().keys())}")
                 raise typer.Exit(code=1)
 
-            target_build_dir = build_dir or (root / "build")
             tc = TC(root, target_build_dir, config=cfg.__dict__)  # pass raw dict
             if clean_first:
                 tc.clean()
@@ -197,5 +196,8 @@ def _detect_lang(root: Path) -> str:
     # Lua
     if any(root.rglob("*.lua")):
         return "lua_native"
+    # YAML projects (pure configs)
+    if any(root.rglob("*.yaml")) or any(root.rglob("*.yml")):
+        return "yaml"
     # default
     return "cpp" 

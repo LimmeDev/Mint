@@ -69,6 +69,7 @@ _builtin = (
     "php_native",
     "ruby_native",
     "lua_native",
+    "yaml",
 )
 
 for _name in _builtin:
