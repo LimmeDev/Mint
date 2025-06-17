@@ -33,12 +33,35 @@ class BuildConfig:
     def load(path: Path) -> "BuildConfig":
         if path.exists():
             data = yaml.safe_load(path.read_text()) or {}
+            # Validate top-level keys and suggest corrections for typos.
+            allowed = {"name", "cxxflags", "ldflags", "targets", "profiles"}
+            unknown = [k for k in data.keys() if k not in allowed]
+            if unknown:
+                from difflib import get_close_matches
+
+                lines = []
+                for key in unknown:
+                    suggestion = get_close_matches(key, allowed, n=1)
+                    if suggestion:
+                        lines.append(f"Unknown key '{key}'. Did you mean '{suggestion[0]}'?")
+                    else:
+                        lines.append(f"Unknown key '{key}'.")
+                raise MintError("\n".join(lines))
+
             return BuildConfig(data)
         return BuildConfig()
 
 
 class Builder:
-    def __init__(self, project_root: Path, build_dir: Path | None = None, *, release: bool = False, config: BuildConfig | None = None):
+    def __init__(
+        self,
+        project_root: Path,
+        build_dir: Path | None = None,
+        *,
+        release: bool = False,
+        config: BuildConfig | None = None,
+        use_sccache: bool = False,
+    ):
         self.project_root = project_root
         self.build_dir = build_dir or default_build_dir(project_root)
         self.obj_dir = self.build_dir / "obj"
@@ -53,6 +76,7 @@ class Builder:
             self.cxxflags += ["-O0", "-g"]
         self.ldflags = self.config.ldflags or []
         self.compile_commands: List[Dict] = []
+        self.use_sccache = use_sccache
 
     # ---------------------------------------------------------------------
     # Public API
@@ -126,6 +150,8 @@ class Builder:
 
     def _compile_single(self, src: Path, obj: Path):
         cmd = [self.compiler, "-c", *self.cxxflags, "-I", str(self.project_root), "-o", str(obj), str(src)]
+        if self.use_sccache:
+            cmd.insert(0, "sccache")
         run(cmd)
         self.compile_commands.append({
             "directory": str(self.project_root),
@@ -136,9 +162,23 @@ class Builder:
     def _link(self, objects: List[Path]) -> Path:
         output = self.bin_dir / (self.config.name or self.project_root.name)
         cmd = [self.compiler, "-o", str(output), *map(str, objects), *self.ldflags]
+        if self.use_sccache:
+            cmd.insert(0, "sccache")
         run(cmd)
         return output
 
     def _write_compile_commands(self):
-        cc_json = self.build_dir / "compile_commands.json"
-        cc_json.write_text(json.dumps(self.compile_commands, indent=2)) 
+        cc_json_build = self.build_dir / "compile_commands.json"
+        data = json.dumps(self.compile_commands, indent=2)
+        cc_json_build.write_text(data)
+
+        # Also write (or symlink) to project root for IDEs like clangd.
+        cc_json_root = self.project_root / "compile_commands.json"
+        try:
+            if cc_json_root.exists():
+                cc_json_root.unlink()
+            # Prefer symlink to avoid duplication and keep paths identical.
+            cc_json_root.symlink_to(cc_json_build.relative_to(self.project_root))
+        except (OSError, NotImplementedError):
+            # Fallback: copy
+            cc_json_root.write_text(data) 

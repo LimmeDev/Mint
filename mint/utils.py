@@ -80,6 +80,15 @@ def run(cmd: List[str], *, cwd: Path | None = None) -> None:
             if result.stderr:
                 console.print("[red]stderr:[/]")
                 console.print(result.stderr.rstrip())
+            if os.getenv("MINT_EXPLAIN") == "1":
+                console.print(f"[blue]Command:[/] {' '.join(cmd)}")
+                # Attempt naive include/lib extraction (for typical -I and -L flags)
+                incs = [p[2:] for p in cmd if p.startswith("-I")]
+                libs = [p[2:] for p in cmd if p.startswith("-L")]
+                if incs:
+                    console.print(f"[blue]Include search paths:[/] {', '.join(incs)}")
+                if libs:
+                    console.print(f"[blue]Library search paths:[/] {', '.join(libs)}")
         # Keep raw logs to file
         if _KEEP_LOGS and cwd is not None:
             logs_dir = Path(cwd) / 'build' / 'logs'
