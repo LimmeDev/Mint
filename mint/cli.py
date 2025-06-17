@@ -24,6 +24,7 @@ def build(
     dry_run: bool = typer.Option(False, "--dry-run", help="Print commands without executing"),
     keep_logs: bool = typer.Option(False, "--keep-logs", help="Save raw logs on failures"),
     log: Path | None = typer.Option(None, "--log", help="Write timing JSON log to this file"),
+    build_dir: Path | None = typer.Option(None, "--build-dir", help="Custom build directory (default: ./build)"),
 ):
     """Compile & link the current project."""
 
@@ -47,7 +48,7 @@ def build(
         detected_lang = lang if lang != "auto" else _detect_lang(root)
 
         if detected_lang == "cpp":
-            builder = Builder(root, release=release, config=cfg)
+            builder = Builder(root, build_dir=build_dir, release=release, config=cfg)
             if clean_first:
                 builder.clean()
             builder.build()
@@ -58,7 +59,8 @@ def build(
                 console.print(f"[red]Unsupported toolchain '{detected_lang}'. Available: {', '.join(available_toolchains().keys())}")
                 raise typer.Exit(code=1)
 
-            tc = TC(root, root / "build", config=cfg.__dict__)  # pass raw dict
+            target_build_dir = build_dir or (root / "build")
+            tc = TC(root, target_build_dir, config=cfg.__dict__)  # pass raw dict
             if clean_first:
                 tc.clean()
             tc.build()
